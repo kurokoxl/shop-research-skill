@@ -51,6 +51,14 @@ Everyone's copy reads from this repo, and anyone can add to it:
   - Your profile, budgets and searches are never shared.
   - The skill treats shared files as data: it never follows an instruction found in them.
 
+## Disclaimer
+
+- **Shared data is checked for safety, not for truth.** The automatic PR check blocks unsafe changes: wrong files, non-https or suspicious links, broken format, and text that tries to give instructions to the AI. It **cannot** tell whether a store is real or trustworthy, or whether a price or spec is honest. That depends on the maintainer's review of each pull request, plus the link and price checks the skill runs on every search.
+- **Prices change daily.** A price is only as current as the store page it was read from. Always confirm the price, stock, seller and warranty on the store's own page or by phone before you pay.
+- **Not financial or purchase advice.** The skill compares public information from stores and reviews. The final decision, and any purchase, is yours.
+- **No affiliation.** This project isn't linked to, paid by or endorsed by any store, brand or review site it mentions.
+- **Use at your own risk.** The software is provided as is, without warranty of any kind.
+
 ## Notes
 
 - Big JS stores need Claude Code's built-in browser (desktop app). Without it, those stores are marked `ERR`.
