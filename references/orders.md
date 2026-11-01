@@ -8,7 +8,12 @@ Copy an order, fill the `<…>` slots, and give it to the executor. Every order 
 - No shell or terminal commands.
 - Record only what you saw on a page you opened in this run. **Never invent a price, model code or URL.** If unsure, write UNVERIFIED.
 - Prices exactly as shown, in the page currency. Don't convert. Record the struck-through "was" price if shown.
-- Browser (for JS sites): built-in browser tools `mcp__Claude_Browser__*` (load with ToolSearch "mcp__Claude_Browser__", max_results 64). Open YOUR OWN tab with `preview_start` (url) and pass that `tabId` to every call; never touch other tabs; close yours at the end. Read with `get_page_text` / `find`.
+- Browser (for JS sites): built-in browser tools `mcp__Claude_Browser__*` (load with ToolSearch "mcp__Claude_Browser__", max_results 64). Open YOUR OWN tab with `preview_start` (url) and pass that `tabId` to every call; never touch other tabs; close yours at the end.
+- **Extract, don't dump (saves most tokens).** Read results pages with ONE `javascript_tool` call that returns compact rows, not `get_page_text`. Use the store's recipe from the registry ("Extractor recipes") if there is one; otherwise start from this and adapt the selector:
+  `await new Promise(r=>setTimeout(r,2500)); [...document.querySelectorAll('a[href*="/p/"], a[href*="/product"], a[href*="/dp/"]')].map(a=>a.innerText.replace(/\s+/g,' ').slice(0,160)+' | '+a.href.split('?')[0]).filter(x=>/\d{2},?\d{3}/.test(x)).slice(0,80)`
+  For one product page, return only the text around the price: `const t=document.body.innerText; const i=t.search(/sold by|add to cart|EGP|LE/i); t.slice(Math.max(0,i-400), i+300)`.
+  Use `get_page_text` only when extraction returns nothing, and always with `max_chars: 4000`. Never take screenshots to read prices.
+- When an extractor works on a store that has no recipe yet, put it in your output file under "Recipe: <store>" so it can be saved to the registry.
 - Write only your output file: <path>. Reply in under 6 lines.
 
 ## Discovery (find stores not in the registry)
@@ -43,3 +48,10 @@ For each model:
 4. Score each priority /10 and give an evidence grade: A measured, B some reviews, C official specs only.
 - Spec values must come from measured reviews or the brand's official spec sheet, each with its URL. Store listings and comparison sites are NOT valid sources for specs. If no valid source has a value, write "not confirmed".
 Output: one table (model | key criteria | scores | evidence | lowest price | store) plus one line of sources per model. Mark the best value in each criterion row with 🏆.
+
+## Verify (top picks, one cheap agent)
+Goal: confirm the price, stock and seller of these offers on the live store page: <store | model | claimed price | URL>.
+- Open each URL in your own browser tab. Read it with one extraction call (the store's recipe from the registry, or the product-page snippet in the common rules).
+- If the page redirects to a search or home page, or shows no product, the result is SOFT-404.
+- Output: | Store | Model | Price on page | Was | Stock | Seller / warranty | Result (OK / CHANGED / OOS / SOFT-404 / ERR) | Exact text read (max 200 chars) |
+- The "exact text" column must be copied from the page, not summarised. That is how the main agent checks your work.

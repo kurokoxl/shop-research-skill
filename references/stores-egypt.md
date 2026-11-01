@@ -72,3 +72,13 @@ Last full TV sweep: 2026-10-27 (65"+ and 55"–64").
 | nilestack.duckdns.org | ⚠ Dynamic-DNS domain, no company or contact info |
 | Circuits, Mobile Masr | No TVs (Circuits: PC/tablets; Mobile Masr: phones) |
 | Dubizzle / OLX | Used goods: only if the user asks |
+
+## Extractor recipes (tested; one JS call per page via `javascript_tool`)
+| Store | Recipe |
+|---|---|
+| Noon (search) | URL `/egypt-en/search/?q=<words>`. Wait ~3.5 s, then `[...document.querySelectorAll('a[href*="/p/"]')].map(a=>a.innerText.replace(/\n+/g,' / ').slice(0,170))` gives title, rating, price, was price and delivery per card (tested 2026-10-28) |
+| Amazon.eg (product) | Add `?language=en_AE`. `const t=document.body.innerText; const i=t.indexOf('Sold by'); t.slice(i-350,i+60)` gives price, stock ("Only N left"), "Fulfilled by" and seller (tested 2026-10-27) |
+| Raya (product) | `const t=document.body.innerText; t.slice(t.indexOf('<MODEL CODE>'), t.indexOf('<MODEL CODE>')+500)` gives price, was price, instalments and warranty. A missing product shows an empty page titled "Raya Shop" (soft 404) |
+| B.TECH (product) | `t.slice(t.indexOf('Add to cart')-700, t.indexOf('Add to cart'))` gives sizes, warranty, "Sold by" and other sellers' prices (in "LE"). The page also says "out of stock" or "notify me" when unavailable |
+| 2B | Missing product URLs redirect to `/catalogsearch/result/?q=…` with HTTP 200: treat that as not found |
+| Ehab Center | Use the size category pages (e.g. TVs 55 Inch). Product pages don't show the price in the standard WooCommerce selectors, so read the price from the category card |

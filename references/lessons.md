@@ -20,3 +20,4 @@ One dated line per lesson. Merge duplicates, and delete lines that stop being tr
 - 2026-10-27: Gemini (agy) store sweeps invent product URLs and prices (most of 66 links dead or soft-404). Use agy only for review research; give ALL store sweeps to browser agents.
 - 2026-10-28: Gemini price grids are fine as leads (it found the real Raya QN85D 39,999 deal), but ~60% of its URLs were 404 or redirected (B.TECH, Cairo Sales). Verify every cell you report.
 - 2026-10-27: Haiku agents work well for browsing and listing, but sometimes end without a report; read their output file directly.
+- 2026-11-01: Token test (Haiku, Noon, 3 pages): full-page reads ~20k tokens per page; JS extraction ~31–34k per page. Fixed per-call context dominates, so extraction mostly improves data (140 clean rows vs 105 plus 15 cut-off prices), not tokens. Real savings come from running fewer agents and calls: model cache, fresh-sweep reuse, one verifier.

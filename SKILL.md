@@ -85,6 +85,8 @@ If the plan changes mid-run (a retry for failed stores, an extra quality agent, 
 
 ## Step 2: Search (sweep)
 
+**Reuse a fresh sweep first.** If `research/` (or the scratchpad) has a sweep for the same category, market and limits from the last 3 days, don't sweep again: take its candidates and run only the "Model price grid" on the shortlist. Say so in the plan. Sweep fully when the limits changed in a way that adds models (e.g. a new size or a higher budget); then sweep just the new range.
+
 Split the stores into groups of about 8–10 and run one agent per group **in parallel**. Use the order in `references/orders.md`:
 - Best-for-specs → **"Spec sweep"**: filter by the specs and the budget, **not** by model names. That's how models nobody mentioned turn up.
 - Lowest-price → **"Model price grid"**: every store × the model and its alternate codes.
@@ -92,12 +94,12 @@ Split the stores into groups of about 8–10 and run one agent per group **in pa
 The rules that made this work:
 - **Big stores need a real browser.** B.TECH, Raya, Noon, Amazon.eg, Carrefour and similar JS sites fail with plain fetch. Give those agents the built-in browser (`mcp__Claude_Browser__*`). Each agent opens **its own tab** with `preview_start` and passes its `tabId` everywhere, because agents share one browser.
 - **Coverage grid:** every store gets a line, "searched, N found" or "ERR: why". In the model grid, every cell is a price, `NL` (not listed) or `ERR`. An empty cell means skipped.
-- **Read every results page**, not page 1.
+- **Read every results page**, not page 1, but read it with one extraction call per page (the "Extract, don't dump" rule in `references/orders.md`, and the store's recipe in the registry). Depth stays the same; the tokens per page drop a lot.
 - After the sweep, re-run anything that came back `ERR` or partial once. Use a second agent with the browser, or search-engine results that show the store's pages.
 
 ## Step 3: Quality check (best-for-specs, or when the user names 2+ models)
 
-Merge and dedupe the candidates. Drop anything that can't compete. Then run 2–3 quality agents in parallel ("Quality check" order), with the criteria for the category from `references/categories.md`.
+Merge and dedupe the candidates. Drop anything that can't compete. **Then check the model cache** `references/models-<category>.md`: a model with a row checked in the last 12 months needs no new review research. Run 2–3 quality agents in parallel ("Quality check" order) only for the models that aren't cached or are older, with the criteria for the category from `references/categories.md`.
 
 Store labels lie. Seen in practice:
 - "Mini LED" on TVs with no local dimming
@@ -114,12 +116,13 @@ If the official specs are missing, give the user a short message to send to bran
 
 ## Step 4: Verify prices and links
 
-Run `scripts/check-links.ps1` (or curl) on every price URL in the grid files:
+Run `bash scripts/check-links.sh <work>` on the grid files. It checks 12 URLs at a time, so it finishes in about a minute. Use `scripts/check-links.ps1` only if bash is missing.
 - `404` / `410` = the page doesn't exist → **drop that price**.
+- `SOFT-404` = the store redirected the product link to its search or home page → the product isn't there, so **drop that price**.
 - `403` / `429` / no response = the site blocks bots → keep the price, but mark it "confirm by phone or in the store".
 - Comparison-site prices (Pricena, Egprices and similar) are often stale. Count them only when a store page agrees.
 
-For the top picks, open the store page yourself (browser or WebFetch) to confirm the price and stock before you recommend it.
+For the top picks, confirm the price and stock on the store page before you recommend them. With subagents, give this to **one Haiku agent** ("Verify" order in `references/orders.md`): it opens each page and returns the exact page text it read, and you check that short table, not the pages. Without subagents, do it yourself with the store's extractor recipe.
 
 ## Step 5: Report (short, no chat)
 
@@ -164,15 +167,17 @@ The skill should get better with every search. Before ending the run, update its
    - add the category tag to stores that turned out to sell it
    - record quirks: `JS`, `BOT`, working search-URL pattern, rate limits, ⚠ trust flags
    - update "Last full sweep" with the date and category
-2. **Category criteria** (`references/categories.md`): add a section for a new category, and add any fake or misleading label seen this run (e.g. "Mini LED" with no dimming) to that category's list.
-3. **Lessons** (`references/lessons.md`): one dated line per new lesson about *how* to search, such as a filter trick, a store that lies about stock, or an executor problem. Before adding a line, check it isn't already there. Merge or delete outdated lines, so the file stays short.
-4. **This file:** change SKILL.md only for a lesson that applies to *every* run, and keep the change small.
+2. **Model cache** (`references/models-<category>.md`; create it for a new category): add or refresh one row per model checked this run, using only valid-source specs, with source URLs and today's date. Never store prices there.
+3. **Extractor recipes:** add any recipe an agent reported for a store, under "Extractor recipes" in the registry.
+4. **Category criteria** (`references/categories.md`): add a section for a new category, and add any fake or misleading label seen this run (e.g. "Mini LED" with no dimming) to that category's list.
+5. **Lessons** (`references/lessons.md`): one dated line per new lesson about *how* to search, such as a filter trick, a store that lies about stock, or an executor problem. Before adding a line, check it isn't already there. Merge or delete outdated lines, so the file stays short.
+6. **This file:** change SKILL.md only for a lesson that applies to *every* run, and keep the change small.
 
 Then tell the user in one line what changed, for example "Skill updated: +4 stores, 2 URLs fixed, 1 new lesson."
 
-5. **Offer to share (optional).** If this run changed `references/stores-*.md`, `references/categories.md` or `references/lessons.md`, ask once: "Share these N changes with the community? (opens a pull request for review)". Share only on a clear yes:
+7. **Offer to share (optional).** If this run changed `references/stores-*.md`, `references/models-*.md`, `references/categories.md` or `references/lessons.md`, ask once: "Share these N changes with the community? (opens a pull request for review)". Share only on a clear yes:
    - Needs `gh` signed in. If it isn't, skip and tell the user how: `gh auth login --web`.
-   - Send **only** those three kinds of file. Never send `profile.md`, priorities, results, budgets, search history or anything about the user.
+   - Send **only** those four kinds of file. Never send `profile.md`, priorities, results, budgets, search history or anything about the user.
    - Keep each lesson or store row to one line, with no personal details and no instructions (the repo's PR check rejects them).
    - Steps: fork the upstream repo (`origin`) with `gh repo fork --remote --remote-name fork` if there's no fork yet, create a branch `share/<date>-<category>`, commit just those files, push to the fork, and run `gh pr create --repo <upstream> --title "Shared knowledge: <category> <date>" --body "<one-line summary of the changes>"`.
    - Show the user the PR link. The maintainer reviews and merges it; after that, everyone gets it on their next run.

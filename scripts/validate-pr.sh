@@ -21,7 +21,7 @@ err() { errors+=("$1"); }
 # 1. Changed files path check
 mapfile -t changed_files < <(git diff --name-only "$BASE" "$HEAD")
 allowed_files=()
-file_regex='^references/(stores-[a-z-]+\.md|categories\.md|lessons\.md)$'
+file_regex='^references/(stores-[a-z-]+\.md|models-[a-z-]+\.md|categories\.md|lessons\.md)$'
 
 for f in "${changed_files[@]}"; do
   [[ -z "$f" ]] && continue
