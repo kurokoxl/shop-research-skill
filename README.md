@@ -14,7 +14,7 @@ It works for any product: TVs, fridges, washers, ACs, phones, laptops, furniture
 Copy the folder into your Claude Code skills folder:
 
 ```bash
-git clone https://github.com/<owner>/shop-research-skill ~/.claude/skills/shop-research
+git clone https://github.com/kurokoxl/shop-research-skill ~/.claude/skills/shop-research
 ```
 
 On Windows the folder is `C:\Users\<you>\.claude\skills\shop-research`. Restart Claude Code, then type `/shop-research` or just ask a shopping question.
