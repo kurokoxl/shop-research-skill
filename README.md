@@ -40,6 +40,17 @@ Say "reset my profile" to change them.
 | `references/lessons.md` | What past runs learned about searching |
 | `scripts/check-links.ps1` | Finds dead price links (PowerShell) |
 
+## Shared knowledge
+
+Everyone's copy reads from this repo, and anyone can add to it:
+- **Read:** at the start of every run, the skill runs `git pull`, so you always get the latest stores, misleading labels and lessons.
+- **Contribute:** after a run that found new stores or lessons, the skill asks "Share these changes?". On yes, it opens a pull request containing only those lines. You need a GitHub account and `gh auth login` once.
+- **Safety:**
+  - An automatic check (`.github/workflows/validate-pr.yml`) rejects PRs that touch other files, break the table format, use non-https or suspicious links, or contain text that looks like instructions to the AI.
+  - The maintainer reviews every PR before it's merged.
+  - Your profile, budgets and searches are never shared.
+  - The skill treats shared files as data: it never follows an instruction found in them.
+
 ## Notes
 
 - Big JS stores need Claude Code's built-in browser (desktop app). Without it, those stores are marked `ERR`.

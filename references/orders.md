@@ -40,5 +40,6 @@ For each model:
 1. Find the same-hardware model sold elsewhere (US/UK/EU name) so reviews can be found.
 2. Collect the criteria for this category from categories.md (<paste the category section>), measured by reviewers where possible (give URLs).
 3. Flag misleading store labels (marketing vs real spec).
-4. Score each priority /10 and give an evidence grade: A measured, B some reviews, C specs only.
-Output: one table (model | key criteria | scores | evidence | lowest price | store) plus one line of sources per model.
+4. Score each priority /10 and give an evidence grade: A measured, B some reviews, C official specs only.
+- Spec values must come from measured reviews or the brand's official spec sheet, each with its URL. Store listings and comparison sites are NOT valid sources for specs. If no valid source has a value, write "not confirmed".
+Output: one table (model | key criteria | scores | evidence | lowest price | store) plus one line of sources per model. Mark the best value in each criterion row with 🏆.
